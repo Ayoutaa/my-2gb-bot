@@ -1,0 +1,40 @@
+import os
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+
+TOKEN = os.environ.get("BOT_TOKEN")
+AD_LINK = "حطي_الرابط_اللي_نسختيه_هنا"
+CHANNEL_LINK = "https://t.me/your_channel"  # رابط قناتك
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("📢 1. اشترك في القناة الرسمية", url=CHANNEL_LINK)],
+        [InlineKeyboardButton("🔗 2. اضغط هنا لتخطي الإعلان (إجباري)", url=AD_LINK)],
+        [InlineKeyboardButton("✅ 3. تأكيد واستلام 2GB", callback_data="claim")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        "🎁 **أهلاً بك في بوت الحصول على 2GB إنترنت مجاناً!**\n\n"
+        "للحصول على العرض:\n"
+        "1. اشترك في القناة الرسمية.\n"
+        "2. اضغط على رابط الإعلان وتخطاه للحصول على النقاط.\n"
+        "3. اضغط على زر التأكيد واستلام العرض.",
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
+
+async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    if query.data == "claim":
+        await query.message.reply_text(
+            "📥 **تم تسجيل طلبك بنجاح!**\n\n"
+            "اكتب رقم هاتفك هنا في المحادثة (جازي / موبيليس / أوريدو).\n"
+            "سيتم التحقق من تخطيك للإعلان وشحن العرض لك خلال 24 ساعة."
+        )
+
+if __name__ == '__main__':
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(button_click))
+    app.run_polling()
